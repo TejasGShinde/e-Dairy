@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const Profile = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -20,6 +21,12 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setOrders(ordersResponse.data);
+
+        // Calculate total amount for providers
+        if (userResponse.data.userType === 'provider') {
+          const total = ordersResponse.data.reduce((sum, order) => sum + order.totalAmount, 0);
+          setTotalAmount(total);
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
         navigate('/login');
@@ -41,7 +48,7 @@ const Profile = () => {
         <div className="flex flex-col md:flex-row items-center">
           <div className="w-full md:w-1/4 flex justify-center">
             <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center text-4xl font-bold text-gray-500 shadow-lg">
-              {userInfo?.name[0]}
+              {userInfo?.name ? userInfo.name[0] : ''}
             </div>
           </div>
           <div className="w-full md:w-3/4 mt-4 md:mt-0 md:ml-6">
@@ -66,15 +73,19 @@ const Profile = () => {
               ) : (
                 <div className="mt-2">
                   <h2 className="text-xl font-semibold text-gray-700">Products Sold</h2>
-                  {orders.map(product => (
-                    <div key={product._id} className="border-b border-gray-200 py-2">
+                  {orders.map(order => (
+                    <div key={order._id} className="border-b border-gray-200 py-2">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-700">{product.name}</span>
-                        <span className="text-gray-600">Sold: {product.quantity}</span>
+                        <span className="font-medium text-gray-700">{order.products.map(product => product.name).join(', ')}</span>
+                        <span className="text-gray-600">Sold: {order.products.reduce((total, product) => total + product.quantity, 0)}</span>
                       </div>
-                      <p className="text-gray-600">Price: ${product.price}</p>
+                      <p className="text-gray-600">Price: ${order.products.reduce((total, product) => total + product.price * product.quantity, 0)}</p>
                     </div>
                   ))}
+                  <div className="mt-4">
+                    <h2 className="text-xl font-semibold text-gray-700">Total Amount Sold</h2>
+                    <p className="text-gray-600">${totalAmount}</p>
+                  </div>
                 </div>
               )}
             </div>

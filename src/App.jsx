@@ -8,6 +8,7 @@ import CustomerDashboard from './components/CustomerDashboard';
 import ProviderProducts from './components/ProviderProducts';
 import Orders from './components/Orders';
 import Profile from './components/Profile';
+import Providers from './components/Providers';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/provider/:providerId" element={<ProviderProducts />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/providers" element={<Providers />} />
       </Routes>
     </Router>
   );
